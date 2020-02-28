@@ -1,14 +1,6 @@
 import asyncio
 import struct
 
-async def recv_all(reader, num_bytes):
-    """Read the given number of bytes from the socket. Don't stop until all data is received."""
-    # Initial recieve in order to start the data transfer
-    data = await reader.read(num_bytes)
-    while len(data) < num_bytes:
-        # Subtract from num_bytes the length of the data every time until we get all data.
-        data += await reader.read(num_bytes - len(data))
-    return data
 
 
 async def recv_formatted_data(reader, frmt):
@@ -16,7 +8,7 @@ async def recv_formatted_data(reader, frmt):
     Receives struct-formatted data from the given socket according to the struct format given and
     returns a tuple of values.
     """
-    data = struct.unpack(frmt, await recv_all(reader, struct.calcsize(frmt)))
+    data = struct.unpack(frmt, await reader.read(struct.calcsize(frmt)))
     return data
 
 
@@ -33,7 +25,9 @@ async def recv_str(reader):
     Receives a string using the socket. The string must be prefixed with its length and encoded.
     """
     length = await recv_single_value(reader, "<i")
-    return (await recv_all(reader, length)).decode("utf-8")
+    data = await reader.read(length)
+    string = data.decode()
+    return string
 
 
 async def recv_str_list(reader):
@@ -55,7 +49,7 @@ def send_str(writer, string):
     """
     string = string.encode()
     data = struct.pack('<i', len(string))
-    data += struct.pack(str(len(string)) + 's', string)
+    data += string
     writer.write(data)
 
 
