@@ -2,7 +2,6 @@ import asyncio
 import struct
 
 
-
 async def recv_formatted_data(reader, frmt):
     """
     Receives struct-formatted data from the given socket according to the struct format given and
@@ -62,6 +61,7 @@ def send_str_list(writer, strings):
     writer.write(data)
     for string in strings:
         send_str(writer, string)
+
 
 def send_integer(writer, i):
     writer.write(struct.pack("<i", i))

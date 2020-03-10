@@ -29,7 +29,7 @@ class ChatProtocol(asyncio.DatagramProtocol):
     def format_message(self, op_code, message):
         """
         Encodes a message with an operation code appended to the front.
-        """ 
+        """
         full_message = str(op_code) + message
         full_message = full_message.encode()
         return full_message
@@ -122,7 +122,7 @@ class ChatProtocol(asyncio.DatagramProtocol):
                 break
             # Broadcast the message by prefixing the string with a 3 and
             # sending the username along with the message.
-            full_message = ("3" + self.username + " ~ " + message).encode()
+            full_message = ("3" + self.username + "~" + message).encode()
             self.transport.sendto(full_message, ('255.255.255.255', PORT))
 
     def datagram_received(self, data, addr):
@@ -130,7 +130,7 @@ class ChatProtocol(asyncio.DatagramProtocol):
         Method called whenever a datagram is recieved.
         """
         # Decode recieved data into op code and message.
-        op_code, message = unpack_message(self, data)
+        op_code, message = self.unpack_message(data)
         # Check to see if the recieved data is from the client itself
         if addr[0] != get_ip():
             # Close the connection
@@ -142,16 +142,16 @@ class ChatProtocol(asyncio.DatagramProtocol):
                 if self.username == message:
                     self.transport.sendto(("9" + "quit").encode(), addr)
                 else:
-                    self.transport.sendto(prepare_message_log().encode(), addr)
+                    self.transport.sendto(self.prepare_message_log().encode(), addr)
             # Recieving the message log.
             elif op_code == 2:
-                instantiate_message_log(message)
+                self.instantiate_message_log(message)
             # Recieving a message.
             elif op_code == 3:
-                recieve_message(self, message)
+                self.recieve_message(message)
         # Adding the client's own message to the output and log.
         elif addr[0] == get_ip() and op_code == 3:
-            recieve_message(self, message)
+            self.recieve_message(message)
 
     def error_received(self, exc):
         """

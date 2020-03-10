@@ -17,8 +17,7 @@ async def send_messages(writer, username, reader_task):
         send_str(writer, message)
         await writer.drain()
         # Broadcast the message
-        
-    
+
 
 async def recieve_messages(reader):
     while True:
@@ -39,6 +38,7 @@ async def handshake_request(reader, writer):
     send_integer(writer, 1)
     await username_validation(reader, writer)
 
+
 async def username_validation(reader, writer):
     loop = asyncio.get_running_loop()
     prompt = await recv_str(reader)
@@ -50,10 +50,9 @@ async def username_validation(reader, writer):
     except Exception:
         print("Username already taken.")
         return
-        
 
 
-async def recieve_message_log(reader, writer, name):  
+async def recieve_message_log(reader, writer, name):
     length = await recv_single_value(reader, "<i")
     log = []
     for i in range(0, length):
@@ -61,7 +60,7 @@ async def recieve_message_log(reader, writer, name):
         log.append(message)
     print_log(log, length)
     await start_tasks(reader, writer, name)
-    
+
 
 async def start_tasks(reader, writer, name):
     reader_task = asyncio.create_task(recieve_messages(reader))
@@ -72,15 +71,17 @@ async def start_tasks(reader, writer, name):
 
 async def chat_client(ip, port):
     print(ip)
-    reader, writer = await asyncio.open_connection(host = ip, port = port)
+    reader, writer = await asyncio.open_connection(host=ip, port=port)
     await handshake_request(reader, writer)
+
 
 def main():
     parser = argparse.ArgumentParser(description='TCP Client')
-    parser.add_argument("-ip", "--ip", type = str, default='127.0.0.1')
-    parser.add_argument("-p", "--port", type = int, default=25565)
+    parser.add_argument("-ip", "--ip", type=str, default='127.0.0.1')
+    parser.add_argument("-p", "--port", type=int, default=25565)
     args = parser.parse_args()
     asyncio.run(chat_client(args.ip, args.port))
+
 
 if __name__ == "__main__":
     main()
