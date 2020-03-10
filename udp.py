@@ -50,8 +50,7 @@ class ChatProtocol(asyncio.DatagramProtocol):
         in it for the first time.
         """
         if len(self.message_log) == 0:
-            self.message_log = message.split("`")
-            print(self.message_log)
+            self.message_log = message.split("\x1d")
             # This may cause the program to print out multiple logs when there
             # are multiple people sending messages.
             for msg in self.message_log:
@@ -67,10 +66,9 @@ class ChatProtocol(asyncio.DatagramProtocol):
         # end of the string, causing an empty string to be produced when we
         # split later on.
         i = 0
-        print(self.message_log)
         for msg in self.message_log:
             if i != len(self.message_log) - 1:
-                message_log_string += msg + "`"
+                message_log_string += msg + "\x1d"
             else:
                 message_log_string += msg
             i += 1
@@ -79,11 +77,12 @@ class ChatProtocol(asyncio.DatagramProtocol):
     def recieve_message(self, message):
         time = datetime.datetime.now().time()
         time = time.strftime("%H:%M:%S")
-        full_message = time + " ~ " + message
+        username, message =  message.split('\x1c')
+        full_message = time + " ~ " + username + " ~ " + message
         if len(self.message_log) >= 10:
             self.message_log.pop(0)
         self.message_log.append(full_message)
-        print(time + " ~ " + message)
+        print(full_message)
 
     def connection_made(self, transport):
         """
@@ -122,7 +121,7 @@ class ChatProtocol(asyncio.DatagramProtocol):
                 break
             # Broadcast the message by prefixing the string with a 3 and
             # sending the username along with the message.
-            full_message = ("3" + self.username + "~" + message).encode()
+            full_message = ("3" + self.username + "\x1c" + message).encode()
             self.transport.sendto(full_message, ('255.255.255.255', PORT))
 
     def datagram_received(self, data, addr):
