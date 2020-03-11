@@ -1,3 +1,8 @@
+"""
+This program runs a server for a chat client based on TCP protocol.
+Name: Brandon Adams and Trae Freeman
+"""
+
 import asyncio
 import struct
 import datetime
@@ -101,8 +106,8 @@ async def chat_server(port):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='TCP Client')
-    parser.add_argument("-p", "--port", type=int, help="port that you want", default=25565)
+    parser = argparse.ArgumentParser(description='Server for a tcp chat program.')
+    parser.add_argument("-p", "--port", type=int, help="The port that you want to connect on.", default=25565)
     args = parser.parse_args()
     asyncio.run(chat_server(args.port))
 

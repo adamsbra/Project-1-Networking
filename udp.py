@@ -1,6 +1,12 @@
+"""
+This file runs a chat client based on UDP protocol.
+Name: Brandon Adams and Trae Freeman
+"""
+
 import asyncio
 import socket
 import datetime
+import argparse
 
 PORT = 25555
 
@@ -77,7 +83,7 @@ class ChatProtocol(asyncio.DatagramProtocol):
     def recieve_message(self, message):
         time = datetime.datetime.now().time()
         time = time.strftime("%H:%M:%S")
-        username, message =  message.split('\x1c')
+        username, message = message.split('\x1c')
         full_message = time + " ~ " + username + " ~ " + message
         if len(self.message_log) >= 10:
             self.message_log.pop(0)
@@ -105,8 +111,7 @@ class ChatProtocol(asyncio.DatagramProtocol):
         then it stops the program.
         """
         loop = asyncio.get_running_loop()
-        print("Enter a name: ")
-        name = await loop.run_in_executor(None, input)
+        name = input("Enter a name:")
         # Prefixed with a 1 to indicate that we are confirming a username.
         message = ("1" + name).encode()
         self.transport.sendto(message, ('255.255.255.255', PORT))
@@ -120,7 +125,8 @@ class ChatProtocol(asyncio.DatagramProtocol):
                 self.transport.close()
                 break
             # Broadcast the message by prefixing the string with a 3 and
-            # sending the username along with the message.
+            # sending the username along with the message. Message and
+            # username seperated by file seperator character.
             full_message = ("3" + self.username + "\x1c" + message).encode()
             self.transport.sendto(full_message, ('255.255.255.255', PORT))
 
@@ -139,7 +145,7 @@ class ChatProtocol(asyncio.DatagramProtocol):
             # First Connection
             if op_code == 1:
                 if self.username == message:
-                    self.transport.sendto(("9" + "quit").encode(), addr)
+                    self.transport.sendto(("9").encode(), addr)
                 else:
                     self.transport.sendto(self.prepare_message_log().encode(), addr)
             # Recieving the message log.
@@ -164,10 +170,14 @@ async def main():
     # Setup the socket we will be using - enable broadcase and recieve message
     # on the given port. Normally, this wouldn't be necessary, but with
     # broadcasting it is needed.
+    parser = argparse.ArgumentParser(description='Client for a UDP chat program.')
+    parser.add_argument("-p", "--port", type=int, help="The port that you want to connect on.", default=25555)
+    args = parser.parse_args()
+    PORT = args.port
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
     sock.bind(('', PORT))
-    
+
     # Create the transport and protocol with our pre-made socket
     # If not provided, you would instead use local_addr=(...) and/or
     # remote_addr=(...)

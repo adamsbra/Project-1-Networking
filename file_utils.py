@@ -1,3 +1,8 @@
+"""
+This file contains utility functions for both of the chat programs.
+Name: Brandon Adams and Trae Freeman
+"""
+
 import asyncio
 import struct
 

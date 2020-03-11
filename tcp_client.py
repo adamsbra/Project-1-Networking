@@ -1,3 +1,8 @@
+"""
+This program runs the client for a chat program based on TCP protocol.
+Name: Brandon Adams and Trae Freeman
+"""
+
 import asyncio
 import struct
 import socket
@@ -76,9 +81,9 @@ async def chat_client(ip, port):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='TCP Client')
-    parser.add_argument("-ip", "--ip", type=str, default='127.0.0.1')
-    parser.add_argument("-p", "--port", type=int, default=25565)
+    parser = argparse.ArgumentParser(description='Client for a TCP chat program.')
+    parser.add_argument("-ip", "--ip", type=str, help="The ip that you want to connect to.." default='127.0.0.1')
+    parser.add_argument("-p", "--port", type=int, help="The port that you want to connect on."default=25565)
     args = parser.parse_args()
     asyncio.run(chat_client(args.ip, args.port))
 
